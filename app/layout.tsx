@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import "./globals.css";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -32,12 +31,14 @@ export default function RootLayout({
       const next = rewrite(value);
       if (next !== value) element.setAttribute(attribute, next);
     });
+    update();
     document.addEventListener("DOMContentLoaded", update);
+    new MutationObserver(update).observe(document.documentElement, { childList: true, subtree: true });
     document.addEventListener("click", (event) => {
       const link = event.target.closest('a[href^="/"]');
       if (link) link.setAttribute("href", rewrite(link.getAttribute("href")));
     }, true);
   })();`;
 
-  return <html lang="de"><head><Script id="github-pages-base-path" strategy="beforeInteractive">{pathScript}</Script></head><body>{children}</body></html>;
+  return <html lang="de"><head><script dangerouslySetInnerHTML={{ __html: pathScript }} /></head><body>{children}</body></html>;
 }
