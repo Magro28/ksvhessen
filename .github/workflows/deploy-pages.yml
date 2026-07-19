@@ -28,6 +28,14 @@ jobs:
       - run: npm run build:pages
         env:
           NEXT_PUBLIC_BASE_PATH: /ksvhessen
+      - name: Fix project-site asset paths
+        run: |
+          find out -type f -name '*.html' -print0 | xargs -0 sed -i \
+            -e 's#src="/ksv-logo.svg"#src="/ksvhessen/ksv-logo.svg"#g' \
+            -e 's#href="/ksv-logo.svg"#href="/ksvhessen/ksv-logo.svg"#g' \
+            -e 's#href="/mannschaften"#href="/ksvhessen/mannschaften/"#g' \
+            -e 's#href="/spiele"#href="/ksvhessen/spiele/"#g' \
+            -e 's#href="/verein"#href="/ksvhessen/verein/"#g'
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out
