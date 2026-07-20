@@ -1,10 +1,15 @@
 "use client";
 
+
 import { useEffect, useState } from "react";
 import { directusAsset, getHeroNews, getPublishedNews } from "./lib/directus";
 
+const siteOrigin = process.env.NEXT_PUBLIC_SITE_ORIGIN ?? "";
+const siteHref = (path: string) => siteOrigin || (typeof window !== "undefined" && window.location.hostname === "localhost" ? "http://localhost:3000" : "") ? `${siteOrigin || "http://localhost:3000"}${path}` : path;
+
 const fallbackNews = [
   {
+    id: 1,
     category: "1. Mannschaft",
     date: "16.07.2026",
     title: "Volksbank Kassel Göttingen und KSV Hessen verlängern Partnerschaft",
@@ -12,6 +17,7 @@ const fallbackNews = [
       "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=1200&q=85",
   },
   {
+    id: 2,
     category: "U23",
     date: "13.07.2026",
     title: "U23 erreicht Platz zwei beim Trillhof-Cup",
@@ -19,6 +25,7 @@ const fallbackNews = [
       "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&w=900&q=85",
   },
   {
+    id: 3,
     category: "Saisonstart",
     date: "11.07.2026",
     title: "Löwen starten mit Heimspiel gegen Eintracht Frankfurt II",
@@ -37,6 +44,7 @@ const ticker = [
 const fallbackHeroSlides = [
   {
     type: "news",
+    id: 3,
     label: "Saisonstart 2026/27",
     title: "Die Löwen sind zurück.",
     copy: "Alles, was den KSV Hessen Kassel bewegt — direkt aus dem Auestadion.",
@@ -45,6 +53,7 @@ const fallbackHeroSlides = [
   },
   {
     type: "news",
+    id: 1,
     label: "1. Mannschaft · 16.07.2026",
     title: "Partnerschaft verlängert.",
     copy: "Die Volksbank Kassel Göttingen bleibt an der Seite der Löwen.",
@@ -53,6 +62,7 @@ const fallbackHeroSlides = [
   },
   {
     type: "result",
+    id: undefined,
     label: "Letztes Ergebnis · Saison 2025/26",
     title: "Auswärtssieg am Bieberer Berg.",
     copy: "Die Löwen bezwingen Kickers Offenbach im Saisonfinale verdient mit 3:1.",
@@ -82,8 +92,9 @@ export default function Home() {
     getPublishedNews().then((items) => {
       if (items.length > 0) {
         setNews(items.map((item) => ({
+          id: item.id,
           category: item.category ?? "KSV Hessen Kassel",
-          date: item.created_on ? new Intl.DateTimeFormat("de-DE").format(new Date(item.created_on)) : "",
+          date: item.published_at ? new Intl.DateTimeFormat("de-DE").format(new Date(item.published_at)) : "",
           title: item.title,
           image: directusAsset(item.image, item.image_url ?? fallbackNews[0].image) ?? fallbackNews[0].image,
         })));
@@ -91,12 +102,13 @@ export default function Home() {
     });
   }, []);
 
+
   useEffect(() => {
     getHeroNews().then((items) => {
       if (items.length > 0) {
         setHeroSlides(items.map((item) => ({
           type: "news" as const,
-          label: `${item.category ?? "News"}${item.created_on ? ` · ${new Intl.DateTimeFormat("de-DE").format(new Date(item.created_on))}` : ""}`,
+          label: `${item.category ?? "News"}${item.published_at ? ` · ${new Intl.DateTimeFormat("de-DE").format(new Date(item.published_at))}` : ""}`,
           title: item.title,
           copy: item.excerpt ?? "Aktuelles aus dem Löwenrudel.",
           image: directusAsset(item.image, item.image_url ?? fallbackHeroSlides[0].image) ?? fallbackHeroSlides[0].image,
@@ -131,7 +143,7 @@ export default function Home() {
       <h1>{item.type === "result" ? <>3:1<br /><em>Auswärtssieg.</em></> : item.title}</h1>
       <p className="hero-copy">{item.copy}</p>
       {item.score && <div className="hero-score"><span>{item.score[0]}</span><b>{item.score[1]}</b><i>:</i><b>{item.score[2]}</b><span>{item.score[3]}</span></div>}
-      <div className="hero-actions"><a className="button button-red" href={item.type === "result" ? "#news" : "#spiele"}>{item.action} <span>↗</span></a><a className="button button-ghost" href="#news">Alle News</a></div>
+      <div className="hero-actions"><a className="button button-red" href={item.type === "result" ? "#news" : item.id ? siteHref(`/artikel?id=${item.id}`) : "#news"}>{item.action} <span>↗</span></a><a className="button button-ghost" href="#news">Alle News</a></div>
     </div>
   );
 
@@ -143,8 +155,8 @@ export default function Home() {
           <span><b>KSV</b><small>HESSEN KASSEL</small></span>
         </a>
         <nav className="desktop-nav" aria-label="Hauptnavigation">
-          {["Startseite", "News", "Mannschaften", "Spiele", "Verein"].map((item) => (
-            <a key={item} className={activeNav === item ? "active" : ""} href={item === "Mannschaften" ? "/mannschaften" : item === "Spiele" ? "/spiele" : item === "Verein" ? "/verein" : `#${item.toLowerCase()}`} onClick={() => setActiveNav(item)}>{item}</a>
+          {["Startseite", "News", "Mannschaften", "Spiele", "Verein", "Sponsoren"].map((item) => (
+            <a key={item} className={activeNav === item ? "active" : ""} href={item === "Mannschaften" ? siteHref("/mannschaften") : item === "Spiele" ? siteHref("/spiele") : item === "Verein" ? siteHref("/verein") : item === "Sponsoren" ? siteHref("/sponsoren") : `#${item.toLowerCase()}`} onClick={() => setActiveNav(item)}>{item}</a>
           ))}
         </nav>
         <div className="header-actions">
@@ -154,7 +166,7 @@ export default function Home() {
           <button className="menu-button" aria-label={menuOpen ? "Menü schließen" : "Menü öffnen"} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>☰</button>
         </div>
       </header>
-      {menuOpen && <div className="mobile-menu-overlay"><div className="mobile-menu-inner"><span className="section-kicker">Navigation</span><a href="#news" onClick={() => setMenuOpen(false)}>News <span>↗</span></a><a href="/mannschaften" onClick={() => setMenuOpen(false)}>Mannschaften <span>↗</span></a><a href="/spiele" onClick={() => setMenuOpen(false)}>Spiele & Tabelle <span>↗</span></a><a href="/verein" onClick={() => setMenuOpen(false)}>Verein <span>↗</span></a><button onClick={() => setMenuOpen(false)}>Menü schließen ×</button></div></div>}
+      {menuOpen && <div className="mobile-menu-overlay"><div className="mobile-menu-inner"><span className="section-kicker">Navigation</span><a href="#news" onClick={() => setMenuOpen(false)}>News <span>↗</span></a><a href={siteHref("/mannschaften")} onClick={() => setMenuOpen(false)}>Mannschaften <span>↗</span></a><a href={siteHref("/spiele")} onClick={() => setMenuOpen(false)}>Spiele & Tabelle <span>↗</span></a><a href={siteHref("/verein")} onClick={() => setMenuOpen(false)}>Verein <span>↗</span></a><a href={siteHref("/sponsoren")} onClick={() => setMenuOpen(false)}>Sponsoren <span>↗</span></a><button onClick={() => setMenuOpen(false)}>Menü schließen ×</button></div></div>}
 
       <section className="hero" id="top">
         <div className="hero-image hero-image-current" style={{ backgroundImage: `linear-gradient(90deg,rgba(13,16,18,.98) 0%,rgba(13,16,18,.68) 43%,rgba(13,16,18,.2) 100%),url('${slide.image}')` }} />
@@ -167,14 +179,14 @@ export default function Home() {
       </section>
 
       <section className="next-match shell" id="spiele">
-        <div className="fixture-heading"><div><div className="section-kicker">Spieltag <span>Alle Termine</span></div><h2>Vorher. Jetzt.<br /><em>Als Nächstes.</em></h2></div><a className="button button-ghost fixture-plan" href="/spiele">Zum Spielplan <span>↗</span></a></div>
+        <div className="fixture-heading"><div><div className="section-kicker">Spieltag <span>Alle Termine</span></div><h2>Vorher. Jetzt.<br /><em>Als Nächstes.</em></h2></div><a className="button button-ghost fixture-plan" href={siteHref("/spiele")}>Zum Spielplan <span>↗</span></a></div>
         <div className="fixture-strip">{fixtures.map((fixture) => <article className={`fixture-card ${fixture.kind}`} key={fixture.state}><div className="fixture-card-top"><span>{fixture.state}</span><small>{fixture.competition}</small></div><div className="fixture-date">{fixture.date}</div><div className="fixture-teams"><div className="fixture-team"><span className={`fixture-badge ${fixture.homeMark === "KSV" ? "ksv-badge" : "opponent-badge"}`}>{fixture.homeMark === "KSV" ? <img src="/ksv-logo.svg" alt="" /> : fixture.homeMark}</span><strong>{fixture.home}</strong></div><div className="fixture-score">{fixture.score}</div><div className="fixture-team fixture-team-away"><span className={`fixture-badge ${fixture.awayMark === "KSV" ? "ksv-badge" : "opponent-badge"}`}>{fixture.awayMark === "KSV" ? <img src="/ksv-logo.svg" alt="" /> : fixture.awayMark}</span><strong>{fixture.away}</strong></div></div><div className="fixture-card-bottom"><span>{fixture.kind === "result" ? "Spielbericht" : fixture.kind === "active" ? "Auestadion" : "Weitere Termine folgen"}</span>{fixture.kind === "active" && <button onClick={() => setRadioOn(true)}>Löwenradio <span>↗</span></button>}</div></article>)}</div>
       </section>
 
       <section className="news-section" id="news">
         <div className="shell">
           <div className="section-heading"><div><div className="section-kicker">Aus dem Löwenrudel</div><h2>Neuigkeiten</h2></div><a className="text-link" href="#alle-news">Alle News <span>↗</span></a></div>
-          <div className="news-grid">{news.map((item, index) => <article className={`news-card news-${index + 1}`} key={item.title}><div className="news-image" style={{ backgroundImage: `url(${item.image})` }}><span>{item.category}</span></div><div className="news-body"><time>{item.date}</time><h3>{item.title}</h3><a href="#artikel">Artikel lesen <span>→</span></a></div></article>)}</div>
+          <div className="news-grid">{news.map((item, index) => <article className={`news-card news-${index + 1}`} key={item.title}><div className="news-image" style={{ backgroundImage: `url(${item.image})` }}><span>{item.category}</span></div><div className="news-body"><time>{item.date}</time><h3>{item.title}</h3><a href={siteHref(`/artikel?id=${item.id}`)}>Artikel lesen <span>→</span></a></div></article>)}</div>
         </div>
       </section>
 
@@ -186,7 +198,7 @@ export default function Home() {
       </section>
 
       <footer className="footer"><div className="shell footer-top"><div className="brand footer-brand"><img className="brand-logo" src="/ksv-logo.svg" alt="" /><span><b>KSV</b><small>HESSEN KASSEL</small></span></div><div><span className="footer-label">Immer informiert</span><h3>Dein Platz im Rudel.</h3></div><a className="button button-red" href="#newsletter">Newsletter abonnieren <span>↗</span></a></div><div className="shell footer-bottom"><span>© 2026 KSV Hessen Kassel e.V.</span><span>Impressum · Datenschutz · Kontakt</span><span>Made for the Löwen <b>♥</b></span></div></footer>
-      <nav className="mobile-nav" aria-label="Mobile Navigation"><a className="selected" href="#top">⌂<small>Home</small></a><a href="#news">▣<small>News</small></a><a href="/spiele">◉<small>Spiele</small></a><a href="/mannschaften">♙<small>Kader</small></a><a href="#menue">☰<small>Menü</small></a></nav>
+      <nav className="mobile-nav" aria-label="Mobile Navigation"><a className="selected" href="#top">⌂<small>Home</small></a><a href="#news">▣<small>News</small></a><a href={siteHref("/spiele")}>◉<small>Spiele</small></a><a href={siteHref("/mannschaften")}>♙<small>Kader</small></a><a href="#menue">☰<small>Menü</small></a></nav>
     </main>
   );
 }

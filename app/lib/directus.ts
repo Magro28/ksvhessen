@@ -8,10 +8,13 @@ export type DirectusFile = {
 export type DirectusNews = {
   id: number;
   title: string;
+  slug?: string | null;
+  body?: string | null;
   excerpt?: string | null;
   category?: string | null;
+  published_at?: string | null;
   image_url?: string | null;
-  image?: DirectusFile | null;
+  image?: DirectusFile | string | null;
   created_on?: string;
 };
 
@@ -25,6 +28,42 @@ export type DirectusMatch = {
   home_score?: number | null;
   away_score?: number | null;
   status?: string | null;
+};
+
+export type DirectusTeam = {
+  id: number;
+  name: string;
+  season?: string | null;
+  photo_url?: string | null;
+  photo?: DirectusFile | null;
+  description?: string | null;
+  sort?: number | null;
+};
+
+export type DirectusPlayer = {
+  id: number;
+  team: string;
+  name: string;
+  position: string;
+  number: number;
+  photo_url?: string | null;
+  photo?: DirectusFile | null;
+};
+
+export type DirectusSponsor = {
+  id: number;
+  name: string;
+  tier?: string | null;
+  logo_url?: string | null;
+  logo?: DirectusFile | string | null;
+  website?: string | null;
+  industry?: string | null;
+  address?: string | null;
+  contact_name?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  is_active?: boolean;
+  sort?: number | null;
 };
 
 export type DirectusStanding = {
@@ -49,6 +88,7 @@ export async function getPublishedNews(): Promise<DirectusNews[]> {
     const params = new URLSearchParams({
       "filter[is_published][_eq]": "true",
       fields: "*,image.*",
+      sort: "-published_at",
       limit: "3",
     });
     const response = await fetch(`${directusUrl}/items/news?${params.toString()}`);
@@ -66,6 +106,7 @@ export async function getHeroNews(): Promise<DirectusNews[]> {
       "filter[is_published][_eq]": "true",
       "filter[is_hero][_eq]": "true",
       fields: "*,image.*",
+      sort: "-published_at",
       limit: "5",
     });
     const response = await fetch(`${directusUrl}/items/news?${params.toString()}`);
@@ -75,6 +116,10 @@ export async function getHeroNews(): Promise<DirectusNews[]> {
   } catch {
     return [];
   }
+}
+
+export function getNewsItem(id: number) {
+  return getItems<DirectusNews>("news", new URLSearchParams({ "filter[id][_eq]": String(id), fields: "*,image.*", limit: "1" }));
 }
 
 async function getItems<T>(collection: string, params: URLSearchParams) {
@@ -90,6 +135,22 @@ async function getItems<T>(collection: string, params: URLSearchParams) {
 
 export function getMatches() {
   return getItems<DirectusMatch>("matches", new URLSearchParams({ limit: "-1" }));
+}
+
+export function getTeams() {
+  return getItems<DirectusTeam>("teams", new URLSearchParams({ limit: "-1" }));
+}
+
+export function getPlayers() {
+  return getItems<DirectusPlayer>("players", new URLSearchParams({ limit: "-1" }));
+}
+
+export function getPlayer(id: number) {
+  return getItems<DirectusPlayer>("players", new URLSearchParams({ "filter[id][_eq]": String(id), "limit": "1" }));
+}
+
+export function getSponsors() {
+  return getItems<DirectusSponsor>("sponsors", new URLSearchParams({ limit: "-1" }));
 }
 
 export function getStandings() {
