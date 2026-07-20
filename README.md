@@ -54,9 +54,14 @@ Sammlungen stehen danach echte Datei-Felder zur Verfügung:
 
 - `news.image` – Titelbild eines Artikels
 - `news.is_hero` – Checkbox: Artikel zusätzlich im Hero-Karussell anzeigen
+- `news.published_at` – Veröffentlichungsdatum, standardmäßig der aktuelle Zeitpunkt
 - `teams.photo` – Mannschaftsfoto für den Hero-Bereich
 - `players.photo` – Spielerfoto
 - `sponsors.logo` – Sponsorenlogo
+- `sponsors.industry` – Branche für das Partnerverzeichnis
+- `sponsors.address` – Adresse des Partners
+- `sponsors.contact_name` – Ansprechpartner
+- `sponsors.phone` / `sponsors.email` – Kontaktdaten
 
 Beim Bearbeiten eines Eintrags das jeweilige Feld anklicken und eine Datei aus
 der Directus-Dateibibliothek auswählen oder neu hochladen. Die Datei ist dann

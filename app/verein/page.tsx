@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 
+const siteOrigin = process.env.NEXT_PUBLIC_SITE_ORIGIN ?? "";
+const siteHref = (path: string) => siteOrigin || (typeof window !== "undefined" && window.location.hostname === "localhost" ? "http://localhost:3000" : "") ? `${siteOrigin || "http://localhost:3000"}${path}` : path;
+
 const areas = [
   ["Vorstand", "Daniel Bettermann", "Sponsoring · Marketing · Medien"],
   ["Vorstand", "Florian Beisheim", "Finanzen"],
@@ -20,8 +23,8 @@ export default function VereinPage() {
 
   return (
     <main className="club-page">
-      <header className="site-header club-page-header"><a className="brand" href="/" aria-label="KSV Hessen Kassel Startseite"><img className="brand-logo" src="/ksv-logo.svg" alt="KSV Hessen Kassel" /><span><b>KSV</b><small>HESSEN KASSEL</small></span></a><nav className="desktop-nav" aria-label="Hauptnavigation"><a href="/">Startseite</a><a href="/#news">News</a><a href="/mannschaften">Mannschaften</a><a href="/spiele">Spiele</a><a className="active" href="/verein">Verein</a></nav><div className="header-actions"><a className="radio-pill" href="/#ticker"><span className="live-dot" /> Löwenradio</a><button className="menu-button" aria-label={menuOpen ? "Menü schließen" : "Menü öffnen"} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>☰</button></div></header>
-      {menuOpen && <div className="mobile-menu-overlay"><div className="mobile-menu-inner"><span className="section-kicker">Navigation</span><a href="/">Startseite <span>↗</span></a><a href="/mannschaften">Mannschaften <span>↗</span></a><a href="/spiele">Spiele & Tabelle <span>↗</span></a><button onClick={() => setMenuOpen(false)}>Menü schließen ×</button></div></div>}
+      <header className="site-header club-page-header"><a className="brand" href={siteHref("/")} aria-label="KSV Hessen Kassel Startseite"><img className="brand-logo" src="/ksv-logo.svg" alt="KSV Hessen Kassel" /><span><b>KSV</b><small>HESSEN KASSEL</small></span></a><nav className="desktop-nav" aria-label="Hauptnavigation"><a href={siteHref("/")}>Startseite</a><a href={siteHref("/#news")}>News</a><a href={siteHref("/mannschaften")}>Mannschaften</a><a href={siteHref("/spiele")}>Spiele</a><a className="active" href={siteHref("/verein")}>Verein</a><a href={siteHref("/sponsoren")}>Sponsoren</a></nav><div className="header-actions"><a className="radio-pill" href={siteHref("/#ticker")}><span className="live-dot" /> Löwenradio</a><button className="menu-button" aria-label={menuOpen ? "Menü schließen" : "Menü öffnen"} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>☰</button></div></header>
+      {menuOpen && <div className="mobile-menu-overlay"><div className="mobile-menu-inner"><span className="section-kicker">Navigation</span><a href={siteHref("/")}>Startseite <span>↗</span></a><a href={siteHref("/mannschaften")}>Mannschaften <span>↗</span></a><a href={siteHref("/spiele")}>Spiele & Tabelle <span>↗</span></a><a href={siteHref("/sponsoren")}>Sponsoren <span>↗</span></a><button onClick={() => setMenuOpen(false)}>Menü schließen ×</button></div></div>}
 
       <section className="club-hero"><div className="club-hero-image" /><div className="shell club-hero-content"><p className="eyebrow"><span className="live-dot" /> Seit über 70 Jahren · Nordhessen</p><h1>Mehr als<br /><em>Fußball.</em></h1><p>Der KSV Hessen Kassel steht für Region, Zusammenhalt und die Leidenschaft, die unser Löwenrudel verbindet.</p></div><div className="club-hero-mark"><img src="/ksv-logo.svg" alt="" /></div></section>
 
