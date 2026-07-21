@@ -1,7 +1,7 @@
 "use client";
 
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { directusAsset, getHeroNews, getPublishedNews } from "./lib/directus";
 
 const siteOrigin = process.env.NEXT_PUBLIC_SITE_ORIGIN ?? "";
@@ -87,6 +87,7 @@ export default function Home() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [previousSlide, setPreviousSlide] = useState<number | null>(null);
   const [isSliding, setIsSliding] = useState(false);
+  const fixtureStripRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     getPublishedNews().then((items) => {
@@ -108,6 +109,7 @@ export default function Home() {
       if (items.length > 0) {
         setHeroSlides(items.map((item) => ({
           type: "news" as const,
+          id: item.id,
           label: `${item.category ?? "News"}${item.published_at ? ` · ${new Intl.DateTimeFormat("de-DE").format(new Date(item.published_at))}` : ""}`,
           title: item.title,
           copy: item.excerpt ?? "Aktuelles aus dem Löwenrudel.",
@@ -134,13 +136,35 @@ export default function Home() {
     return () => window.clearInterval(timer);
   }, [activeSlide, isSliding]);
 
+  useEffect(() => {
+    const focusNextFixture = () => {
+      if (!window.matchMedia("(max-width: 800px)").matches) return;
+
+      const strip = fixtureStripRef.current;
+      const nextFixture = strip?.querySelector<HTMLElement>(".fixture-card.active");
+      if (!strip || !nextFixture) return;
+
+      const offset = nextFixture.offsetLeft - (strip.clientWidth - nextFixture.clientWidth) / 2;
+      strip.scrollLeft = Math.max(0, offset);
+    };
+
+    const animationFrame = window.requestAnimationFrame(focusNextFixture);
+    const layoutTimeout = window.setTimeout(focusNextFixture, 180);
+    window.addEventListener("resize", focusNextFixture);
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.clearTimeout(layoutTimeout);
+      window.removeEventListener("resize", focusNextFixture);
+    };
+  }, []);
+
   const slide = heroSlides[activeSlide];
   const outgoingSlide = previousSlide === null ? null : heroSlides[previousSlide];
 
   const renderHeroContent = (item: (typeof heroSlides)[number], motionClass: string) => (
     <div className={`hero-content shell ${motionClass}`}>
       <p className="eyebrow"><span className={item.type === "result" ? "result-dot" : "live-dot"} /> {item.label}</p>
-      <h1>{item.type === "result" ? <>3:1<br /><em>Auswärtssieg.</em></> : item.title}</h1>
+      <h1>{item.type === "result" ? <>3:1<br /><em>Auswärtssieg.</em></> : item.id ? <a className="hero-title-link" href={siteHref(`/artikel?id=${item.id}`)}>{item.title}</a> : item.title}</h1>
       <p className="hero-copy">{item.copy}</p>
       {item.score && <div className="hero-score"><span>{item.score[0]}</span><b>{item.score[1]}</b><i>:</i><b>{item.score[2]}</b><span>{item.score[3]}</span></div>}
       <div className="hero-actions"><a className="button button-red" href={item.type === "result" ? "#news" : item.id ? siteHref(`/artikel?id=${item.id}`) : "#news"}>{item.action} <span>↗</span></a><a className="button button-ghost" href="#news">Alle News</a></div>
@@ -175,12 +199,11 @@ export default function Home() {
         {outgoingSlide && renderHeroContent(outgoingSlide, "hero-content-outgoing")}
         {renderHeroContent(slide, "hero-content-current")}
         <div className="hero-carousel-controls" aria-label="Hero-Karussell"><button aria-label="Vorheriger Artikel" onClick={() => changeSlide((activeSlide - 1 + heroSlides.length) % heroSlides.length)}>←</button>{heroSlides.map((item, index) => <button key={item.label} className={activeSlide === index ? "selected" : ""} aria-label={`Artikel ${index + 1}`} onClick={() => changeSlide(index)}><span>0{index + 1}</span><small>{item.type === "result" ? "ERGEBNIS" : "NEWS"}</small></button>)}<button aria-label="Nächster Artikel" onClick={() => changeSlide((activeSlide + 1) % heroSlides.length)}>→</button></div>
-        <div className="hero-scroll">Scroll für mehr <span>↓</span></div>
       </section>
 
       <section className="next-match shell" id="spiele">
         <div className="fixture-heading"><div><div className="section-kicker">Spieltag <span>Alle Termine</span></div><h2>Vorher. Jetzt.<br /><em>Als Nächstes.</em></h2></div><a className="button button-ghost fixture-plan" href={siteHref("/spiele")}>Zum Spielplan <span>↗</span></a></div>
-        <div className="fixture-strip">{fixtures.map((fixture) => <article className={`fixture-card ${fixture.kind}`} key={fixture.state}><div className="fixture-card-top"><span>{fixture.state}</span><small>{fixture.competition}</small></div><div className="fixture-date">{fixture.date}</div><div className="fixture-teams"><div className="fixture-team"><span className={`fixture-badge ${fixture.homeMark === "KSV" ? "ksv-badge" : "opponent-badge"}`}>{fixture.homeMark === "KSV" ? <img src="/ksv-logo.svg" alt="" /> : fixture.homeMark}</span><strong>{fixture.home}</strong></div><div className="fixture-score">{fixture.score}</div><div className="fixture-team fixture-team-away"><span className={`fixture-badge ${fixture.awayMark === "KSV" ? "ksv-badge" : "opponent-badge"}`}>{fixture.awayMark === "KSV" ? <img src="/ksv-logo.svg" alt="" /> : fixture.awayMark}</span><strong>{fixture.away}</strong></div></div><div className="fixture-card-bottom"><span>{fixture.kind === "result" ? "Spielbericht" : fixture.kind === "active" ? "Auestadion" : "Weitere Termine folgen"}</span>{fixture.kind === "active" && <button onClick={() => setRadioOn(true)}>Löwenradio <span>↗</span></button>}</div></article>)}</div>
+        <div className="fixture-strip" ref={fixtureStripRef}>{fixtures.map((fixture) => <article className={`fixture-card ${fixture.kind}`} key={fixture.state}><div className="fixture-card-top"><span>{fixture.state}</span><small>{fixture.competition}</small></div><div className="fixture-date">{fixture.date}</div><div className="fixture-teams"><div className="fixture-team"><span className={`fixture-badge ${fixture.homeMark === "KSV" ? "ksv-badge" : "opponent-badge"}`}>{fixture.homeMark === "KSV" ? <img src="/ksv-logo.svg" alt="" /> : fixture.homeMark}</span><strong>{fixture.home}</strong></div><div className="fixture-score">{fixture.score}</div><div className="fixture-team fixture-team-away"><span className={`fixture-badge ${fixture.awayMark === "KSV" ? "ksv-badge" : "opponent-badge"}`}>{fixture.awayMark === "KSV" ? <img src="/ksv-logo.svg" alt="" /> : fixture.awayMark}</span><strong>{fixture.away}</strong></div></div><div className="fixture-card-bottom"><span>{fixture.kind === "result" ? "Spielbericht" : fixture.kind === "active" ? "Auestadion" : "Weitere Termine folgen"}</span>{fixture.kind === "active" && <button onClick={() => setRadioOn(true)}>Löwenradio <span>↗</span></button>}</div></article>)}</div>
       </section>
 
       <section className="news-section" id="news">

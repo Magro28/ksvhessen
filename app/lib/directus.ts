@@ -50,6 +50,29 @@ export type DirectusPlayer = {
   photo?: DirectusFile | null;
 };
 
+export type DirectusStaff = {
+  id: number;
+  team?: string | null;
+  name: string;
+  role: string;
+  photo_url?: string | null;
+  photo?: DirectusFile | string | null;
+  bio?: string | null;
+  sort?: number | null;
+  is_active?: boolean;
+};
+
+export type DirectusClubPerson = {
+  id: number;
+  department: string;
+  name: string;
+  role: string;
+  email?: string | null;
+  phone?: string | null;
+  sort?: number | null;
+  is_active?: boolean;
+};
+
 export type DirectusSponsor = {
   id: number;
   name: string;
@@ -143,6 +166,14 @@ export function getTeams() {
 
 export function getPlayers() {
   return getItems<DirectusPlayer>("players", new URLSearchParams({ limit: "-1" }));
+}
+
+export function getStaff() {
+  return getItems<DirectusStaff>("staff", new URLSearchParams({ limit: "-1", sort: "sort" }));
+}
+
+export function getClubPeople() {
+  return getItems<DirectusClubPerson>("club_people", new URLSearchParams({ limit: "-1", sort: "sort" }));
 }
 
 export function getPlayer(id: number) {
