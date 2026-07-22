@@ -107,6 +107,38 @@ aktivieren und den Artikel veröffentlichen. Der Artikel erscheint nach dem
 Neuladen automatisch oben im Hero-Karussell. Sind keine Hero-News aktiviert,
 wird das vorhandene Demo-Karussell als Fallback verwendet.
 
+### Regionalliga-Daten aus API-Football
+
+Die bestehenden Collections `teams`, `matches` und `standings` werden vom
+externen Sync nicht verändert. API-Football-Daten werden in
+`football_fixtures` und `football_standings` gespeichert. Dafür müssen
+`API_FOOTBALL_KEY` und `API_FOOTBALL_LEAGUE_ID=86` in der lokalen `.env` bzw.
+`.env.production` gesetzt sein.
+
+Einmalige Einrichtung der Directus-Collections:
+
+```bash
+COMPOSE_FILE=docker-compose.yml ENV_FILE=.env ./scripts/ksv-server.sh setup-football
+```
+
+Synchronisation von Spielplan, Ergebnissen und der vollständigen Tabelle:
+
+```bash
+COMPOSE_FILE=docker-compose.yml ENV_FILE=.env ./scripts/ksv-server.sh sync-football
+```
+
+Auf dem Produktionsserver kann `ENV_FILE=.env` weggelassen werden, wenn die
+Produktionsdatei `.env.production` verwendet wird.
+
+Die Saison wird automatisch für die Zeitzone Europe/Berlin berechnet. Der Sync
+bricht ab, wenn der API-Football-Tarif die aktuelle Saison nicht unterstützt,
+und überschreibt in diesem Fall keine vorhandenen Directus-Daten.
+
+Ein Sync verwendet genau zwei Requests an API-Football: einen für Fixtures und
+einen für die Tabelle. Die Saison wird automatisch anhand der Zeitzone
+`Europe/Berlin` ermittelt. Die synchronisierten Daten werden lokal in
+PostgreSQL gespeichert, sodass Seitenaufrufe keine API-Requests erzeugen.
+
 ### Produktionsserver verwalten
 
 Auf dem OVH-Server übernimmt `scripts/ksv-server.sh` die häufigsten Docker-

@@ -76,6 +76,21 @@ services:
       - directus_uploads:/directus/uploads
       - directus_extensions:/directus/extensions
 
+  football-sync:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.football-sync
+    profiles: ["sync"]
+    environment:
+      API_FOOTBALL_KEY: ${API_FOOTBALL_KEY}
+      API_FOOTBALL_LEAGUE_ID: ${API_FOOTBALL_LEAGUE_ID:-86}
+      DIRECTUS_URL: http://directus:8055
+      DIRECTUS_ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL}
+      DIRECTUS_ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD}
+    depends_on:
+      directus:
+        condition: service_started
+
 volumes:
   postgres_data:
   directus_uploads:
