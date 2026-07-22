@@ -107,6 +107,34 @@ aktivieren und den Artikel veröffentlichen. Der Artikel erscheint nach dem
 Neuladen automatisch oben im Hero-Karussell. Sind keine Hero-News aktiviert,
 wird das vorhandene Demo-Karussell als Fallback verwendet.
 
+### Produktionsserver verwalten
+
+Auf dem OVH-Server übernimmt `scripts/ksv-server.sh` die häufigsten Docker-
+und Deployment-Aufgaben. Das Skript erwartet `.env.production` im
+Repository-Root und verwendet automatisch `docker-compose.production.yml`:
+
+```bash
+./scripts/ksv-server.sh start
+./scripts/ksv-server.sh stop
+./scripts/ksv-server.sh restart
+./scripts/ksv-server.sh update
+./scripts/ksv-server.sh status
+./scripts/ksv-server.sh logs directus
+./scripts/ksv-server.sh config
+./scripts/ksv-server.sh backup
+```
+
+Ein Datenbank-Backup kann mit ausdrücklicher Bestätigung wiederhergestellt
+werden:
+
+```bash
+./scripts/ksv-server.sh restore-db ./backups/ksv-database-YYYYMMDD-HHMMSS.sql
+```
+
+Die Wiederherstellung löscht die bestehende Produktionsdatenbank. Directus-
+Uploads werden mit `backup` separat gesichert und müssen bei einer
+Wiederherstellung ebenfalls separat zurückgespielt werden.
+
 ## Included Shape
 
 - edit site code under `app/`
