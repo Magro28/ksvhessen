@@ -1,0 +1,9 @@
+{$SITE_DOMAIN} {
+    encode gzip
+    reverse_proxy frontend:80
+}
+
+{$CMS_DOMAIN} {
+    encode gzip
+    reverse_proxy directus:8055
+}
