@@ -15,6 +15,7 @@ export type DirectusNews = {
   published_at?: string | null;
   image_url?: string | null;
   image?: DirectusFile | string | null;
+  detail_image?: DirectusFile | string | null;
   created_on?: string;
 };
 
@@ -110,7 +111,7 @@ export async function getPublishedNews(): Promise<DirectusNews[]> {
   try {
     const params = new URLSearchParams({
       "filter[is_published][_eq]": "true",
-      fields: "*,image.*",
+      fields: "*,image.*,detail_image.*",
       sort: "-published_at",
       limit: "3",
     });
@@ -128,7 +129,7 @@ export async function getHeroNews(): Promise<DirectusNews[]> {
     const params = new URLSearchParams({
       "filter[is_published][_eq]": "true",
       "filter[is_hero][_eq]": "true",
-      fields: "*,image.*",
+      fields: "*,image.*,detail_image.*",
       sort: "-published_at",
       limit: "5",
     });
@@ -142,7 +143,7 @@ export async function getHeroNews(): Promise<DirectusNews[]> {
 }
 
 export function getNewsItem(id: number) {
-  return getItems<DirectusNews>("news", new URLSearchParams({ "filter[id][_eq]": String(id), fields: "*,image.*", limit: "1" }));
+  return getItems<DirectusNews>("news", new URLSearchParams({ "filter[id][_eq]": String(id), fields: "*,image.*,detail_image.*", limit: "1" }));
 }
 
 async function getItems<T>(collection: string, params: URLSearchParams) {

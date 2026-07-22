@@ -53,6 +53,7 @@ Im Bereich **Dateien** können Bilder hochgeladen werden. In den Content-
 Sammlungen stehen danach echte Datei-Felder zur Verfügung:
 
 - `news.image` – Titelbild eines Artikels
+- `news.detail_image` – optionales Detailbild unter dem Exzerpt auf der Artikeldetailseite
 - `news.is_hero` – Checkbox: Artikel zusätzlich im Hero-Karussell anzeigen
 - `news.published_at` – Veröffentlichungsdatum, standardmäßig der aktuelle Zeitpunkt
 - `teams.photo` – Mannschaftsfoto für den Hero-Bereich
