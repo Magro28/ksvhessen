@@ -59,6 +59,9 @@
 .site-header{height:70px}.site-header .brand-logo{width:82px;height:82px;position:relative;top:10px;z-index:10}.site-header .desktop-nav a{font-family:'Barlow Condensed';font-size:16px;letter-spacing:.04em;text-transform:uppercase}.site-header .desktop-nav a.active:after{bottom:-25px}
 @media(max-width:800px){.site-header{height:64px}.site-header .brand-logo{width:72px;height:72px;top:9px}.mobile-menu-overlay{top:64px}}
 
+/* Keep mobile hero controls in normal flow so long headlines and excerpts cannot cover them. */
+@media(max-width:800px){.hero{height:auto;min-height:650px;display:block;padding-top:1px}.hero-content-current{position:relative;inset:auto;width:100%;padding-top:96px;padding-bottom:8px}.hero-content-outgoing{position:absolute;inset:0;padding-top:96px}.hero-carousel-controls{position:relative;left:auto;right:auto;bottom:auto;margin:24px 20px 30px}.hero-image,.hero-grain{min-height:100%}}
+
 /* Keep the match-up divider centered regardless of team-name length. */
 .schedule-teams{display:grid!important;grid-template-columns:minmax(0,1fr) 42px minmax(0,1fr);align-items:center;gap:8px;text-align:center}.schedule-teams strong:first-child{text-align:right}.schedule-teams strong:last-child{text-align:left}.schedule-teams b{text-align:center}
 @media(max-width:800px){.schedule-teams{grid-template-columns:minmax(0,1fr) 32px minmax(0,1fr);gap:5px}}
