@@ -32,6 +32,8 @@ Aktionen:
   config                 Compose-Konfiguration validieren
   backup                 PostgreSQL und Directus-Uploads sichern
   restore-db <datei>     PostgreSQL aus Dump wiederherstellen (destruktiv)
+  setup-football         Directus-Collections für API-Football anlegen
+  sync-football          Spielplan und Tabelle synchronisieren (2 API-Requests)
   help                   Diese Hilfe anzeigen
 
 Umgebungsvariablen:
@@ -110,6 +112,14 @@ restore_db() {
   echo "Datenbank wiederhergestellt. Directus-Uploads müssen separat zurückgespielt werden."
 }
 
+football_sync() {
+  compose --profile sync run --rm --build football-sync "$@"
+}
+
+setup_football() {
+  compose --profile sync run --rm --build --entrypoint node football-sync /app/scripts/setup-football-collections.mjs
+}
+
 main() {
   local action="${1:-help}"
   shift || true
@@ -131,6 +141,8 @@ main() {
     config) config "$@" ;;
     backup) backup "$@" ;;
     restore-db) restore_db "$@" ;;
+    setup-football) setup_football "$@" ;;
+    sync-football) football_sync "$@" ;;
     *) echo "Unbekannte Aktion: ${action}" >&2; usage; exit 1 ;;
   esac
 }

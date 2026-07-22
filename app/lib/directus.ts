@@ -102,6 +102,66 @@ export type DirectusStanding = {
   points: number;
 };
 
+export type DirectusFootballFixture = {
+  api_fixture_id: number;
+  league_id: number;
+  season: number;
+  matchday: number | null;
+  round_label?: string | null;
+  match_date: string;
+  match_time?: string | null;
+  venue?: string | null;
+  home_team_id?: number | null;
+  home_team: string;
+  home_logo?: string | null;
+  away_team_id?: number | null;
+  away_team: string;
+  away_logo?: string | null;
+  home_score?: number | null;
+  away_score?: number | null;
+  status?: string | null;
+  status_short?: string | null;
+};
+
+export type DirectusFootballStanding = {
+  id?: number;
+  league_id: number;
+  season: number;
+  rank: number;
+  api_team_id: number;
+  team_name: string;
+  team_logo?: string | null;
+  played: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goals_for: number;
+  goals_against: number;
+  goal_diff?: number | null;
+  points: number;
+  form?: string | null;
+  description?: string | null;
+  home_played?: number | null;
+  home_wins?: number | null;
+  home_draws?: number | null;
+  home_losses?: number | null;
+  home_goals_for?: number | null;
+  home_goals_against?: number | null;
+  away_played?: number | null;
+  away_wins?: number | null;
+  away_draws?: number | null;
+  away_losses?: number | null;
+  away_goals_for?: number | null;
+  away_goals_against?: number | null;
+};
+
+export function currentFootballSeason(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Berlin", year: "numeric", month: "numeric" }).formatToParts(date);
+  const year = Number(parts.find((part) => part.type === "year")?.value);
+  const month = Number(parts.find((part) => part.type === "month")?.value);
+  return month >= 7 ? year : year - 1;
+}
+
 export function directusAsset(file: DirectusFile | string | null | undefined, fallback?: string) {
   const fileId = typeof file === "string" ? file : file?.id;
   return fileId ? `${directusUrl}/assets/${fileId}` : fallback;
@@ -187,4 +247,16 @@ export function getSponsors() {
 
 export function getStandings() {
   return getItems<DirectusStanding>("standings", new URLSearchParams({ limit: "-1" }));
+}
+
+export function getFootballFixtures() {
+  return getItems<DirectusFootballFixture>("football_fixtures", new URLSearchParams({
+    "filter[season][_eq]": String(currentFootballSeason()), sort: "matchday,match_date", limit: "-1",
+  }));
+}
+
+export function getFootballStandings() {
+  return getItems<DirectusFootballStanding>("football_standings", new URLSearchParams({
+    "filter[season][_eq]": String(currentFootballSeason()), sort: "rank", limit: "-1",
+  }));
 }
