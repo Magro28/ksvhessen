@@ -1,25 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { DirectusClubPerson, getClubPeople } from "../lib/directus";
 
 const siteOrigin = process.env.NEXT_PUBLIC_SITE_ORIGIN ?? "";
 const siteHref = (path: string) => siteOrigin || (typeof window !== "undefined" && window.location.hostname === "localhost" ? "http://localhost:3000" : "") ? `${siteOrigin || "http://localhost:3000"}${path}` : path;
 
-const areas = [
-  ["Vorstand", "Daniel Bettermann", "Sponsoring · Marketing · Medien"],
-  ["Vorstand", "Florian Beisheim", "Finanzen"],
-  ["Vorstand", "Karsten Crede", "Organisation"],
-  ["Aufsichtsrat", "Jens Lüdecke", "Vorsitz"],
-  ["Sport", "René Klingbeil", "Cheftrainer"],
-  ["Sport", "Michael Beier", "Nachwuchsleitung"],
+const fallbackPeople: DirectusClubPerson[] = [
+  { id: 1, department: "Vorstand", name: "Daniel Bettermann", role: "Sponsoring · Marketing · Medien", sort: 1 },
+  { id: 2, department: "Vorstand", name: "Florian Beisheim", role: "Finanzen", sort: 2 },
+  { id: 3, department: "Vorstand", name: "Karsten Crede", role: "Organisation", sort: 3 },
+  { id: 4, department: "Aufsichtsrat", name: "Jens Lüdecke", role: "Vorsitz", sort: 4 },
+  { id: 5, department: "Sport", name: "René Klingbeil", role: "Cheftrainer", sort: 5 },
+  { id: 6, department: "Sport", name: "Michael Beier", role: "Nachwuchsleitung", sort: 6 },
 ];
-
-const departments = ["Alle", "Vorstand", "Aufsichtsrat", "Sport"];
 
 export default function VereinPage() {
   const [filter, setFilter] = useState("Alle");
   const [menuOpen, setMenuOpen] = useState(false);
-  const people = filter === "Alle" ? areas : areas.filter(([department]) => department === filter);
+  const [clubPeople, setClubPeople] = useState<DirectusClubPerson[]>(fallbackPeople);
+  const departments = ["Alle", ...Array.from(new Set(clubPeople.map((person) => person.department)))];
+  const people = filter === "Alle" ? clubPeople : clubPeople.filter((person) => person.department === filter);
+
+  useEffect(() => {
+    getClubPeople().then((items) => {
+      if (items.length > 0) setClubPeople(items.filter((person) => person.is_active !== false));
+    });
+  }, []);
 
   return (
     <main className="club-page">
@@ -30,7 +37,7 @@ export default function VereinPage() {
 
       <section className="club-intro"><div className="shell club-intro-grid"><div><div className="section-kicker">Der Verein</div><h2>Gemeinsam sind<br /><em>wir stark.</em></h2></div><div className="club-copy"><p>Wir sind ein Traditionsverein aus Kassel. Unsere Mitglieder, Fans, Partner und Ehrenamtlichen bilden eine Gemeinschaft, die Fußball in der Region bewegt.</p><p>Wir stehen für bodenständigen, ehrlichen Fußball, starke Nachwuchsarbeit und den Anspruch, uns Schritt für Schritt weiterzuentwickeln.</p><a className="button button-red" href="#leitbild">Unser Leitbild <span>↗</span></a></div></div></section>
 
-      <section className="club-people" id="gremien"><div className="shell"><div className="club-section-heading"><div><div className="section-kicker">Wer macht was?</div><h2>Das <em>Löwenrudel.</em></h2></div><div className="department-tabs">{departments.map((department) => <button key={department} className={filter === department ? "active" : ""} onClick={() => setFilter(department)}>{department}</button>)}</div></div><div className="people-grid">{people.map(([department, name, role]) => <article className="person-card" key={`${department}-${name}`}><span>{department}</span><h3>{name}</h3><p>{role}</p><b>Kontakt aufnehmen <i>↗</i></b></article>)}</div></div></section>
+      <section className="club-people" id="gremien"><div className="shell"><div className="club-section-heading"><div><div className="section-kicker">Wer macht was?</div><h2>Das <em>Löwenrudel.</em></h2></div><div className="department-tabs">{departments.map((department) => <button key={department} className={filter === department ? "active" : ""} onClick={() => setFilter(department)}>{department}</button>)}</div></div><div className="people-grid">{people.map((person) => <article className="person-card" key={`${person.department}-${person.name}`}><span>{person.department}</span><h3>{person.name}</h3><p>{person.role}</p>{person.email ? <a href={`mailto:${person.email}`}>Kontakt aufnehmen <i>↗</i></a> : <b>Kontakt aufnehmen <i>↗</i></b>}</article>)}</div></div></section>
 
       <section className="club-office"><div className="shell office-grid"><div><div className="section-kicker">Anlaufstelle für Fans</div><h2>Die<br /><em>Geschäftsstelle.</em></h2><p>In Eppos Clubhaus, direkt in Stadionnähe.</p></div><div className="office-card"><div><span>Adresse</span><strong>KSV Hessen Kassel e.V.<br />Damaschkestraße 35<br />34121 Kassel</strong></div><div><span>Kontakt</span><strong>+49 (561) 25474<br />geschaeftsstelle@ksv-hessen.de</strong></div><div><span>Öffnungszeiten</span><strong>Di. & Do. · 10:00–13:00 Uhr<br /><small>Telefonisch: Di.–Fr. · 09:30–13:00 Uhr</small></strong></div><a className="button button-red" href="mailto:geschaeftsstelle@ksv-hessen.de">E-Mail schreiben <span>↗</span></a></div></div></section>
 

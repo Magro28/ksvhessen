@@ -15,6 +15,7 @@ export type DirectusNews = {
   published_at?: string | null;
   image_url?: string | null;
   image?: DirectusFile | string | null;
+  detail_image?: DirectusFile | string | null;
   created_on?: string;
 };
 
@@ -48,6 +49,29 @@ export type DirectusPlayer = {
   number: number;
   photo_url?: string | null;
   photo?: DirectusFile | null;
+};
+
+export type DirectusStaff = {
+  id: number;
+  team?: string | null;
+  name: string;
+  role: string;
+  photo_url?: string | null;
+  photo?: DirectusFile | string | null;
+  bio?: string | null;
+  sort?: number | null;
+  is_active?: boolean;
+};
+
+export type DirectusClubPerson = {
+  id: number;
+  department: string;
+  name: string;
+  role: string;
+  email?: string | null;
+  phone?: string | null;
+  sort?: number | null;
+  is_active?: boolean;
 };
 
 export type DirectusSponsor = {
@@ -87,7 +111,7 @@ export async function getPublishedNews(): Promise<DirectusNews[]> {
   try {
     const params = new URLSearchParams({
       "filter[is_published][_eq]": "true",
-      fields: "*,image.*",
+      fields: "*,image.*,detail_image.*",
       sort: "-published_at",
       limit: "3",
     });
@@ -105,7 +129,7 @@ export async function getHeroNews(): Promise<DirectusNews[]> {
     const params = new URLSearchParams({
       "filter[is_published][_eq]": "true",
       "filter[is_hero][_eq]": "true",
-      fields: "*,image.*",
+      fields: "*,image.*,detail_image.*",
       sort: "-published_at",
       limit: "5",
     });
@@ -119,7 +143,7 @@ export async function getHeroNews(): Promise<DirectusNews[]> {
 }
 
 export function getNewsItem(id: number) {
-  return getItems<DirectusNews>("news", new URLSearchParams({ "filter[id][_eq]": String(id), fields: "*,image.*", limit: "1" }));
+  return getItems<DirectusNews>("news", new URLSearchParams({ "filter[id][_eq]": String(id), fields: "*,image.*,detail_image.*", limit: "1" }));
 }
 
 async function getItems<T>(collection: string, params: URLSearchParams) {
@@ -143,6 +167,14 @@ export function getTeams() {
 
 export function getPlayers() {
   return getItems<DirectusPlayer>("players", new URLSearchParams({ limit: "-1" }));
+}
+
+export function getStaff() {
+  return getItems<DirectusStaff>("staff", new URLSearchParams({ limit: "-1", sort: "sort" }));
+}
+
+export function getClubPeople() {
+  return getItems<DirectusClubPerson>("club_people", new URLSearchParams({ limit: "-1", sort: "sort" }));
 }
 
 export function getPlayer(id: number) {

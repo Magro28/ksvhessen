@@ -53,6 +53,7 @@ Im Bereich **Dateien** können Bilder hochgeladen werden. In den Content-
 Sammlungen stehen danach echte Datei-Felder zur Verfügung:
 
 - `news.image` – Titelbild eines Artikels
+- `news.detail_image` – optionales Detailbild unter dem Exzerpt auf der Artikeldetailseite
 - `news.is_hero` – Checkbox: Artikel zusätzlich im Hero-Karussell anzeigen
 - `news.published_at` – Veröffentlichungsdatum, standardmäßig der aktuelle Zeitpunkt
 - `teams.photo` – Mannschaftsfoto für den Hero-Bereich
@@ -62,6 +63,30 @@ Sammlungen stehen danach echte Datei-Felder zur Verfügung:
 - `sponsors.address` – Adresse des Partners
 - `sponsors.contact_name` – Ansprechpartner
 - `sponsors.phone` / `sponsors.email` – Kontaktdaten
+
+### Trainer und Staff in Directus
+
+Die Mannschaftsseite lädt Trainer und Staff aus der Collection `staff`. Für die
+Collection werden diese Felder benötigt:
+
+- `name` (String)
+- `role` (String)
+- `team` (String, optional; z. B. `1. Mannschaft`, `Frauen`, `U23`)
+- `photo` (Datei, optional)
+- `photo_url` (String, optional)
+- `bio` (Text, optional)
+- `sort` (Integer)
+- `is_active` (Boolean, Standardwert `true`)
+
+Die Collection muss für die öffentliche Rolle lesbar sein, damit die Website
+die Einträge ohne Anmeldung laden kann.
+
+### Vereinsgremien in Directus
+
+Die Personen auf der Vereinsseite werden über die Collection `club_people`
+verwaltet. Benötigt werden `department`, `name`, `role`, `email` (optional),
+`phone` (optional), `sort` und `is_active` (Standardwert `true`). Die
+Kategorien im Frontend werden automatisch aus `department` gebildet.
 
 Beim Bearbeiten eines Eintrags das jeweilige Feld anklicken und eine Datei aus
 der Directus-Dateibibliothek auswählen oder neu hochladen. Die Datei ist dann
